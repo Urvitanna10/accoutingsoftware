@@ -48,6 +48,11 @@ public class main extends javax.swing.JFrame {
         });
 
         jButton2.setText("Product");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setText("Purchase");
         jButton3.addActionListener(new java.awt.event.ActionListener() {
@@ -153,6 +158,12 @@ public class main extends javax.swing.JFrame {
         vendor v=new vendor();
         v.setVisible(rootPaneCheckingEnabled);
     }//GEN-LAST:event_jButton1ActionPerformed
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+
+        // TODO add your handling code here:
+        Product p = new Product();
+        p.setVisible(true);
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
