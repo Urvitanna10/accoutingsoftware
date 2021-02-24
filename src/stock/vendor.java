@@ -43,6 +43,7 @@ public class vendor extends javax.swing.JFrame {
             con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagement","Urvi","localhost");
             
             
+            
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
