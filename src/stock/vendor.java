@@ -5,17 +5,80 @@
  */
 package stock;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
 /**
  *
  * @author Urvi
  */
 public class vendor extends javax.swing.JFrame {
 
+    
     /**
      * Creates new form vendor
      */
     public vendor() {
         initComponents();
+        Connect();
+        load();
+    }
+    
+    Connection con;
+    PreparedStatement pst;
+    DefaultTableModel df;
+    
+    public void Connect(){
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagement","Urvi","localhost");
+            
+            
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    
+    
+    }
+    public void load()
+    {
+        int a;
+        try {
+            pst = con.prepareStatement("select *from vendor");
+            ResultSet rs= pst.executeQuery();
+            
+            ResultSetMetaData rd = rs.getMetaData();
+            a = rd.getColumnCount();
+            df = (DefaultTableModel)jTable1.getModel();
+            df.setRowCount(0);
+            while(rs.next())
+            {
+                Vector v2 =new Vector();
+                for(int i=1; i<=a; i++)
+                {
+                    v2.add(rs.getString("id"));
+                    v2.add(rs.getString("name"));
+                    v2.add(rs.getString("phone"));
+                    v2.add(rs.getString("email"));
+                     v2.add(rs.getString("address"));
+                }
+                    df.addRow(v2);
+                    
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
@@ -32,7 +95,7 @@ public class vendor extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        txtvenor = new javax.swing.JTextField();
+        txtvendor = new javax.swing.JTextField();
         txtphone = new javax.swing.JTextField();
         txtemail = new javax.swing.JTextField();
         txtaddress = new javax.swing.JTextField();
@@ -49,7 +112,7 @@ public class vendor extends javax.swing.JFrame {
         jPanel1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel1.setText("VenerName");
+        jLabel1.setText("VendorName");
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel2.setText("phone");
@@ -59,6 +122,18 @@ public class vendor extends javax.swing.JFrame {
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel4.setText("Address");
+
+        txtvendor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtvendorActionPerformed(evt);
+            }
+        });
+
+        txtphone.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtphoneActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -76,7 +151,7 @@ public class vendor extends javax.swing.JFrame {
                     .addComponent(txtaddress, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtemail, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(txtphone, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtvenor, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtvendor, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(73, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -85,7 +160,7 @@ public class vendor extends javax.swing.JFrame {
                 .addGap(27, 27, 27)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
-                    .addComponent(txtvenor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtvendor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(36, 36, 36)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
@@ -102,6 +177,11 @@ public class vendor extends javax.swing.JFrame {
         );
 
         jButton1.setText("Add");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Edit");
 
@@ -144,7 +224,7 @@ public class vendor extends javax.swing.JFrame {
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(30, 30, 30)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(30, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -167,6 +247,46 @@ public class vendor extends javax.swing.JFrame {
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        try {
+            // TODO add your handling code here:
+            String vname = txtvendor.getText();
+            String phone = txtphone.getText();
+            String email = txtemail.getText();
+            String address = txtaddress.getText();
+            
+            
+            pst= con.prepareStatement("insert into vendor(name,phone,email,address)values(?,?,?,?)");
+            pst.setString(1, vname);
+            pst.setString(2, phone);
+            pst.setString(3, email);
+            pst.setString(4, address);
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(this,"Vendor Addedddd");
+            
+            txtvendor.setText("");
+            txtphone.setText("");
+            txtemail.setText("");
+            txtaddress.setText("");
+            txtvendor.requestFocus();
+            
+            
+            
+            
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void txtphoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtphoneActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtphoneActionPerformed
+
+    private void txtvendorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtvendorActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtvendorActionPerformed
 
     /**
      * @param args the command line arguments
@@ -219,6 +339,6 @@ public class vendor extends javax.swing.JFrame {
     private javax.swing.JTextField txtaddress;
     private javax.swing.JTextField txtemail;
     private javax.swing.JTextField txtphone;
-    private javax.swing.JTextField txtvenor;
+    private javax.swing.JTextField txtvendor;
     // End of variables declaration//GEN-END:variables
 }

@@ -16,6 +16,7 @@ public class main extends javax.swing.JFrame {
      */
     public main() {
         initComponents();
+        
     }
 
     /**
@@ -40,6 +41,11 @@ public class main extends javax.swing.JFrame {
         setFont(new java.awt.Font("Agency FB", 0, 18)); // NOI18N
 
         jButton1.setText("Vendor");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jButton2.setText("Product");
         jButton2.addActionListener(new java.awt.event.ActionListener() {
@@ -147,6 +153,11 @@ public class main extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton5ActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        vendor v=new vendor();
+        v.setVisible(rootPaneCheckingEnabled);
+    }//GEN-LAST:event_jButton1ActionPerformed
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
         // TODO add your handling code here:
