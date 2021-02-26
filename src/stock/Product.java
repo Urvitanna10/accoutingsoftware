@@ -257,6 +257,11 @@ public class Product extends javax.swing.JFrame {
                 "ProductID", "ProductName", "Description", "Barcode", "CostPrice", "RetailPrice", "Quantity", "ReorderLevel"
             }
         ));
+        jTable1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jTable1MouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jTable1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -357,7 +362,7 @@ public class Product extends javax.swing.JFrame {
             
             txtpname.requestFocus();
             
-            
+            load();
             
             
             
@@ -368,15 +373,117 @@ public class Product extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
+        df = (DefaultTableModel)jTable1.getModel();
+        int selected = jTable1.getSelectedRow();
+        
+        int id =Integer.parseInt(df.getValueAt(selected, 0).toString());
+        
+        String pname = txtpname.getText();
+            String des = txtdes.getText();
+            String barcode = txtbarcode.getText();
+            String costprice = txtcprice.getText();
+            String retailprice = txtrprice.getText();
+            String quantity = txtquantity.getText();
+            String reOrderLevel = txtrolevel.getText();
+            
+            
+        try {
+            pst= con.prepareStatement("update product pname =?, des=?, barcode=?, costprice=?, retailprice=?, quantity=?, reOrderLevel=? where id =?");
+            pst.setString(1, pname);
+            pst.setString(2, des);
+            pst.setString(3, barcode);
+            pst.setString(4, costprice);
+            pst.setString(5, retailprice);
+            pst.setString(6, quantity);
+            pst.setString(7, reOrderLevel);
+            pst.setInt(8, id);
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(this,"Product Updated");
+            
+            txtpname.setText("");
+            txtdes.setText("");
+            txtbarcode.setText("");
+            txtcprice.setText("");
+            txtrprice.setText("");
+            txtquantity.setText("");
+            txtrolevel.setText("");
+            
+            txtpname.requestFocus();
+            
+            load();
+            jButton2.setEnabled(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
+        }
+           
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         // TODO add your handling code here:
+        df = (DefaultTableModel)jTable1.getModel();
+        int selected = jTable1.getSelectedRow();
+        
+        int id =Integer.parseInt(df.getValueAt(selected, 0).toString());
+        
+    
+            
+            
+        try {
+            pst= con.prepareStatement("delete from product where id =?");
+            
+            pst.setInt(1, id);
+            pst.executeUpdate();
+            JOptionPane.showMessageDialog(this,"Product Deleteedddd");
+            
+            txtpname.setText("");
+            txtdes.setText("");
+            txtbarcode.setText("");
+            txtcprice.setText("");
+            txtrprice.setText("");
+            txtquantity.setText("");
+            txtrolevel.setText("");
+            
+            txtpname.requestFocus();
+            
+            load();
+            jButton2.setEnabled(true);
+        } catch (SQLException ex) {
+            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
+            txtpname.setText("");
+            txtdes.setText("");
+            txtbarcode.setText("");
+            txtcprice.setText("");
+            txtrprice.setText("");
+            txtquantity.setText("");
+            txtrolevel.setText("");
+            
+            txtpname.requestFocus();
+            
+            load();
+            jButton2.setEnabled(true);
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        // TODO add your handling code here:
+        df = (DefaultTableModel)jTable1.getModel();
+        int selected = jTable1.getSelectedRow();
+        
+        int id =Integer.parseInt(df.getValueAt(selected, 0).toString());
+            txtpname.setText(df.getValueAt(selected, 1).toString());
+            txtdes.setText(df.getValueAt(selected, 2).toString());
+            txtbarcode.setText(df.getValueAt(selected, 3).toString());
+            txtcprice.setText(df.getValueAt(selected, 4).toString());
+            txtrprice.setText(df.getValueAt(selected, 5).toString());
+            txtquantity.setText(df.getValueAt(selected, 6).toString());
+            txtrolevel.setText(df.getValueAt(selected, 7).toString());
+            
+            jButton2.setEnabled(false);
+    }//GEN-LAST:event_jTable1MouseClicked
 
     /**
      * @param args the command line arguments
