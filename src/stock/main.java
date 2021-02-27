@@ -14,10 +14,10 @@ public class main extends javax.swing.JFrame {
     /**
      * Creates new form main
      */
-    public main() {
+   
         initComponents();
         
-    }
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -158,7 +158,7 @@ public class main extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
         vendor v=new vendor();
-        v.setVisible(rootPaneCheckingEnabled);
+        v.setVisible(true);
     }//GEN-LAST:event_jButton1ActionPerformed
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
 
@@ -200,7 +200,7 @@ public class main extends javax.swing.JFrame {
                 new main().setVisible(true);
             }
         });
-    }
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
@@ -212,4 +212,4 @@ public class main extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
-}
+
