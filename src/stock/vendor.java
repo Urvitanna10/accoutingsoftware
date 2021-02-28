@@ -12,46 +12,54 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Vector;
-import java.util.logging.Level;
+import java.util .logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
-import java.lang.Integer;
 
 /**
  *
- * @author Urvi
+ * @author Urvi 
  */
 public class vendor extends javax.swing.JFrame {
-
+ 
     
     /**
      * Creates new form vendor
      */
-    public vendor() {
+    public vendor() throws Exception {
         initComponents();
-        Connect();
+        getCon();
+    //    Connect();
         load();
+       
     }
     
     Connection con;
     PreparedStatement pst;
     DefaultTableModel df;
     
-    public void Connect(){
+    /*public void Connect(){
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost//stockmanagement","root","urvi");
-            
+            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagement","root","");
             
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
         } catch (SQLException ex) {
             Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
-        }
+         }
     
     
+    }*/
+    public Connection getCon() throws Exception{
+        String driver ="com.mysql.jdbc.Driver";
+        String url="jdbc:mysql://localhost:3307/stockmanagement";
+        Class.forName(driver);
+       con=DriverManager.getConnection(url, "root", "");
+        return con;
     }
+    
     public void load()
     {
         int a;
@@ -326,7 +334,7 @@ public class vendor extends javax.swing.JFrame {
         df =(DefaultTableModel)jTable1.getModel();
         int selected =jTable1.getSelectedRow();
         
-        int id =  Integer.parseInt.(df.getValueAt(selected,0).toString());
+        int id =  Integer.parseInt(df.getValueAt(selected,0).toString());
         txtvendor.setText(df.getValueAt(selected,1).toString());
         txtphone.setText(df.getValueAt(selected,2).toString());
         txtemail.setText(df.getValueAt(selected,3).toString());
@@ -339,7 +347,7 @@ public class vendor extends javax.swing.JFrame {
         // TODO add your handling code here:
         df =(DefaultTableModel)jTable1.getModel();
         int selected =jTable1.getSelectedRow();
-        int id =  Integer.parseInt.(df.getValueAt(selected,0).toString());
+        int id =  Integer.parseInt(df.getValueAt(selected,0).toString());
         
             String vname = txtvendor.getText();
             String phone = txtphone.getText();
@@ -377,13 +385,13 @@ public class vendor extends javax.swing.JFrame {
         // TODO add your handling code here:
         df =(DefaultTableModel)jTable1.getModel();
         int selected =jTable1.getSelectedRow();
-        int id =  Integer.parseInt.(df.getValueAt(selected,0).toString());    
+        int id =  Integer.parseInt(df.getValueAt(selected,0).toString());    
             
         try {
             pst= con.prepareStatement("delete from vendor table where id =?");
         
             pst.setInt(1, id);
-            pst.executeUpdate();
+           //pst.executeUpdate();
             JOptionPane.showMessageDialog(this,"Vendor deleteddddd");
            
             
@@ -392,7 +400,7 @@ public class vendor extends javax.swing.JFrame {
             txtemail.setText("");
             txtaddress.setText("");
             txtvendor.requestFocus();
-            load();
+             load();
             
             jButton1.setEnabled(true);
             
@@ -450,8 +458,12 @@ public class vendor extends javax.swing.JFrame {
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new vendor().setVisible(true);
+             public void run() {
+                try {
+                    new vendor().setVisible(true);
+                } catch (Exception ex) {
+                    Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
