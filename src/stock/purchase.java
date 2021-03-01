@@ -7,9 +7,13 @@ package stock;
 
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -32,12 +36,23 @@ public class purchase extends javax.swing.JFrame {
 
     Connection con;
     PreparedStatement pst;
+    PreparedStatement pst1;
+    PreparedStatement pst2;
     DefaultTableModel df;
     ResultSet rs;
     
     public void Connect()
     {
-        
+//        try {
+//            Class.forName("com.mysql.jdbc.Driver");
+//            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagement","root","");
+//            
+//            
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
+//        }
     }
     
     public void Vendor()
@@ -115,6 +130,85 @@ public class purchase extends javax.swing.JFrame {
        
        txttotalcost.setText(String.valueOf(sum));
    }
+   
+   public void add()
+   {
+        try {
+            DateTimeFormatter dt = DateTimeFormatter.ofPattern("yyyy/mm/dd");
+            LocalDateTime now = LocalDateTime.now();
+            String date = dt.format(now);
+            
+            String vendor = txtvendor.getSelectedItem().toString();
+            String subtotal = txttotalcost.getText();
+            String pay = txtpayment.getText();
+            String bal = txtbalance.getText();
+            int lastid =0;
+            
+            String query1 = "insert into purchase(date, vendor, subtotal, pay, bal)values(?,?,?,?,?)";
+            pst = con.prepareStatement(query1, Statement.RETURN_GENERATED_KEYS);
+            
+            pst.setString(1, date );
+            pst.setString(2, vendor );
+            pst.setString(3, subtotal);
+            pst.setString(4, pay);
+            pst.setString(5, bal);
+            pst.executeUpdate();
+            rs = pst.getGeneratedKeys();
+            
+            if(rs.next())
+            {
+                lastid =rs.getInt(1);
+            }
+            
+            String query2 = "insert into purchaseitem(purid, pid, rprice, quantity, total)values(?,?,?,?,?)";
+            pst1 = con.prepareStatement(query2);
+            
+            String productid;
+            String price;
+            String quantity;
+            int total = 0;
+            
+            for(int i=0; i<jTable1.getRowCount() ; i++)
+            {
+                productid = (String)jTable1.getValueAt(i, 0);
+                price = (String)jTable1.getValueAt(i, 2);
+                quantity = (String)jTable1.getValueAt(i, 3);
+                total =(int)jTable1.getValueAt(i, 4);
+                
+                pst1.setInt(1, lastid);
+                pst1.setString(2, productid);
+                pst1.setString(3, price);
+                pst1.setString(4, quantity);
+                pst1.setInt(5, total);
+                pst1.executeUpdate();
+            }
+            
+            String query3 ="update product set quantity = quantity+ ? where barcode=? ";
+            pst2 = con.prepareStatement(query3);
+            
+            
+            for(int i=0; i<jTable1.getRowCount() ; i++)
+            {
+                productid = (String)jTable1.getValueAt(i, 0);
+                quantity = (String)jTable1.getValueAt(i, 3);
+              
+                pst1.setString(1, productid);
+                pst1.setString(2, quantity);
+                pst1.executeUpdate();
+            }
+            
+            JOptionPane.showMessageDialog(this, "Purchase Completedddddddd !!!!!!");
+          
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(purchase.class.getName()).log(Level.SEVERE, null, ex);
+        }
+   }
+   
+   
+   
+   
+   
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -255,6 +349,11 @@ public class purchase extends javax.swing.JFrame {
 
         jButton2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jButton2.setText("Add");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         jButton3.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jButton3.setText("Close");
@@ -444,6 +543,17 @@ public class purchase extends javax.swing.JFrame {
         txtprice.setText("");
         txtquantity.setText("");
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        // TODO add your handling code here:
+        int pay = Integer.parseInt(txtpayment.getText());
+        int subtotal = Integer.parseInt(txttotalcost.getText());
+        int bal = subtotal - pay;
+        
+         txtbalance.setText(String.valueOf(bal));
+        
+        add();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     /**
      * @param args the command line arguments
