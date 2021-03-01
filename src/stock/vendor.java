@@ -357,12 +357,12 @@ public class vendor extends javax.swing.JFrame {
             
         try {
             pst= con.prepareStatement("update vendor set name= ?, phone=?, email=?, address=? where id=?");
-             pst.setString(1, vname);
+            pst.setString(1, vname);
             pst.setString(2, phone);
             pst.setString(3, email);
             pst.setString(4, address);
             pst.setInt(5, id);
-            pst.executeUpdate();
+            //pst.executeUpdate();
             JOptionPane.showMessageDialog(this,"Vendor updated");
            
             
@@ -388,10 +388,10 @@ public class vendor extends javax.swing.JFrame {
         int id =  Integer.parseInt(df.getValueAt(selected,0).toString());    
             
         try {
-            pst= con.prepareStatement("delete from vendor table where id =?");
+        pst= con.prepareStatement("delete from vendor where id =?");
         
             pst.setInt(1, id);
-           //pst.executeUpdate();
+            pst.executeUpdate();
             JOptionPane.showMessageDialog(this,"Vendor deleteddddd");
            
             
@@ -400,7 +400,7 @@ public class vendor extends javax.swing.JFrame {
             txtemail.setText("");
             txtaddress.setText("");
             txtvendor.requestFocus();
-             load();
+            load();
             
             jButton1.setEnabled(true);
             
