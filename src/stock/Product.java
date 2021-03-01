@@ -37,16 +37,16 @@ public class Product extends javax.swing.JFrame {
     
     public void Connect()
     {
-      /**  
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagment", "root", "1357");
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
-        }
-       */ 
+       
+//        try {
+//            Class.forName("com.mysql.cj.jdbc.Driver");
+//            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagment", "root", "");
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+       
     }
     
      public void load()
