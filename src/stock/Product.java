@@ -25,19 +25,20 @@ public class Product extends javax.swing.JFrame {
 
     /**
      * Creates new form Product
+     * @throws java.lang.Exception
      */
-    public Product() {
+    public Product() throws Exception {
         initComponents();
-        Connect();
+        getCon();
     }
 
     Connection con;
     PreparedStatement pst;
     DefaultTableModel df;
     
-    public void Connect()
+   /* public void Connect()
     {
-      /**  
+       
         try {
             Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagment", "root", "1357");
@@ -47,7 +48,14 @@ public class Product extends javax.swing.JFrame {
             Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
         }
        */ 
+         public Connection getCon() throws Exception{
+        String driver ="com.mysql.jdbc.Driver";
+        String url="jdbc:mysql://localhost:3307/stockmanagement";
+        Class.forName(driver);
+           con=DriverManager.getConnection(url, "root", "");
+        return con;
     }
+    
     
      public void load()
     {
@@ -71,8 +79,8 @@ public class Product extends javax.swing.JFrame {
                     v2.add(rs.getString("barcode"));
                     v2.add(rs.getString("cprice"));
                     v2.add(rs.getString("rprice"));
-                    v2.add(rs.getString("quantity"));
-                    v2.add(rs.getString("rolevel"));
+                    v2.add(rs.getString("qty"));
+                    v2.add(rs.getString("rlevel"));
                 }
                     df.addRow(v2);
                     
@@ -341,7 +349,7 @@ public class Product extends javax.swing.JFrame {
             String reOrderLevel = txtrolevel.getText();
             
             
-            pst= con.prepareStatement("insert into product(pname, des, barcode, costprice, retailprice, quantity, reOrderLevel)values(?,?,?,?,?,?,?)");
+            pst= con.prepareStatement("insert into product(pname, des, barcode, cprice, rprice, qty, rlevel)values(?,?,?,?,?,?,?)");
             pst.setString(1, pname);
             pst.setString(2, des);
             pst.setString(3, barcode);
@@ -359,7 +367,6 @@ public class Product extends javax.swing.JFrame {
             txtrprice.setText("");
             txtquantity.setText("");
             txtrolevel.setText("");
-            
             txtpname.requestFocus();
             
             load();
@@ -388,7 +395,7 @@ public class Product extends javax.swing.JFrame {
             
             
         try {
-            pst= con.prepareStatement("update product pname =?, des=?, barcode=?, costprice=?, retailprice=?, quantity=?, reOrderLevel=? where id =?");
+            pst= con.prepareStatement("update product pname =?, des=?, barcode=?, cprice=?, rprice=?, qty=?, rlevel=? where id =?");
             pst.setString(1, pname);
             pst.setString(2, des);
             pst.setString(3, barcode);
@@ -397,7 +404,7 @@ public class Product extends javax.swing.JFrame {
             pst.setString(6, quantity);
             pst.setString(7, reOrderLevel);
             pst.setInt(8, id);
-            pst.executeUpdate();
+            //pst.executeUpdate();
             JOptionPane.showMessageDialog(this,"Product Updated");
             
             txtpname.setText("");
@@ -515,7 +522,11 @@ public class Product extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new Product().setVisible(true);
+                try {
+                    new Product().setVisible(true);
+                } catch (Exception ex) {
+                    Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         });
     }
