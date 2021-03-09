@@ -65,7 +65,7 @@ public class main extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setText("sells");
+        jButton4.setText("Sales");
         jButton4.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton4ActionPerformed(evt);
@@ -147,7 +147,12 @@ public class main extends javax.swing.JFrame {
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
-        purchase p = new purchase();
+        purchase p = null;
+        try {
+            p = new purchase();
+        } catch (Exception ex) {
+            Logger.getLogger(main.class.getName()).log(Level.SEVERE, null, ex);
+        }
         p.setVisible(true);
     }//GEN-LAST:event_jButton3ActionPerformed
 
