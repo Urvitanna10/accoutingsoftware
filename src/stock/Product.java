@@ -30,6 +30,7 @@ public class Product extends javax.swing.JFrame {
     public Product() throws Exception {
         initComponents();
         getCon();
+        load();
     }
 
     Connection con;
