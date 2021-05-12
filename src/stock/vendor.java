@@ -25,8 +25,7 @@ import javax.swing.table.DefaultTableModel;
  * @author Urvi 
  */
 public class vendor extends javax.swing.JFrame {
- 
-    
+
     /**
      * Creates new form vendor
      */
