@@ -56,6 +56,7 @@ public class Sales extends javax.swing.JFrame {
     DefaultTableModel df;
     ResultSet rs;
     
+    
    public Connection getCon() throws Exception{
         String driver ="com.mysql.jdbc.Driver";
         String url="jdbc:mysql://localhost:3307/stockmanagement1";
