@@ -68,8 +68,7 @@ public class Product extends javax.swing.JFrame {
        
 //>>>>>>> origin/master
     }
-    
-    
+        
      public void load()
     {
         int a;
