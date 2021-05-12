@@ -171,7 +171,6 @@ public class purchase extends javax.swing.JFrame {
             String query2 ="insert into purchaseitem(purid,pid,rprice,qty,total)values(?,?,?,?,?)";
             pst1 =con.prepareStatement(query2);
             
-            
             String productid;
             String price;
             String qty;
