@@ -5,7 +5,11 @@
  */
 package stock;
 
- import java.awt.event.KeyEvent;
+import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,28 +18,37 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javax.management.remote.JMXConnectorFactory.connect;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.design.JRDesignQuery;
+import net.sf.jasperreports.engine.design.JasperDesign;
+import net.sf.jasperreports.engine.xml.JRXmlLoader;
+import net.sf.jasperreports.view.JasperViewer;
 
 /**
  *
  * @author pdaxa
  */
-public class purchase extends javax.swing.JFrame {
+public class Sales extends javax.swing.JFrame {
 
     /**
-     * Creates new form purchase
+     * Creates new form Sales
      */
-    public purchase() throws Exception {
+    public Sales() throws Exception {
         initComponents();
         getCon();
-        Vendor();
-        purchase();
-        barcode();
     }
-
+    
     Connection con;
     PreparedStatement pst;
     PreparedStatement pst1;
@@ -43,31 +56,14 @@ public class purchase extends javax.swing.JFrame {
     DefaultTableModel df;
     ResultSet rs;
     
-    public Connection getCon() throws Exception{
+   public Connection getCon() throws Exception{
         String driver ="com.mysql.jdbc.Driver";
         String url="jdbc:mysql://localhost:3307/stockmanagement1";
         Class.forName(driver);
        con=DriverManager.getConnection(url, "root", "");
         return con;
     }
-    public void Vendor()
-    {
-        try {
-            pst = con.prepareStatement("select Distinct name from vendor");
-            rs = pst.executeQuery();
-            
-            txtvendor.removeAllItems();
-            
-            while(rs.next())
-            {
-                txtvendor.addItem(rs.getString("name"));
-            }
-            
-        } catch (SQLException ex) {
-                     Logger.getLogger(purchase.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
+
     public void barcode()
     {
         
@@ -98,126 +94,199 @@ public class purchase extends javax.swing.JFrame {
         }
    }
     
-   public void purchase()
+    public void Sales()
    {
-       
-       try{
-      
-           int  price = Integer.parseInt(txtprice.getText());
-           int quantity = Integer.parseInt(txtquantity.getText());
-           int tot = price * quantity;
-       
-       
-       
-       
-       df = (DefaultTableModel)jTable1.getModel();
-       
-       df.addRow(new Object[]
-       {
-           txtpcode.getText(),
-           txtpname.getText(),
-           txtprice.getText(),
-           txtquantity.getText(),
-           tot
-       });
-       }catch(NumberFormatException e){
-          //System.out.println("not a number");
-       }
-       
-       int sum=0;
-       
-       for(int i =0; i<jTable1.getRowCount(); i++ )
-       {
-           sum =sum + Integer.parseInt(jTable1.getValueAt(i, 4).toString());
-       }
-       
-       txttotalcost.setText(String.valueOf(sum));
-       
-       txtpcode.setText("");
-       txtpname.setText("");
-        txtprice.setText("");
-       txtquantity.setText("");
+        try {
+            String pcode = txtpcode.getText();
+            
+            pst = con.prepareStatement("select * from product where barcode = ?");
+            pst.setString(1, pcode);
+            rs = pst.executeQuery();
+            
+            while(rs.next())
+            {
+                int currentquantity;
+                currentquantity =rs.getInt("qty");
+                int price =Integer.parseInt(txtprice.getText());
+                int qty = Integer.parseInt(txtquantity.getText());
+                    
+                int tot = price * qty;
+                
+                if(qty >= currentquantity)
+                {
+                    JOptionPane.showMessageDialog(this, "Quantity is not enough...");
+                }
+                
+                else
+                {
+                    df = (DefaultTableModel)jTable1.getModel();
+                    
+                    df.addRow(new Object[]
+                    {
+                        txtpcode.getText(),
+                        txtpname.getText(),
+                        txtprice.getText(),
+                        txtquantity.getText(),
+                        tot
+                    });
+                    
+                }
+            }
+                    
+                    int sum=0;
+                    
+                    for(int i =0; i<jTable1.getRowCount(); i++ )
+                    {
+                        sum =sum + Integer.parseInt(jTable1.getValueAt(i, 4).toString());
+                    }
+                    
+                    txttotalcost.setText(String.valueOf(sum));
+                    
+                    txtpcode.setText("");
+                    txtpname.setText("");
+                    txtprice.setText("");
+                    txtquantity.setText("");
+        } catch (SQLException ex) {
+            Logger.getLogger(Sales.class.getName()).log(Level.SEVERE, null, ex);
+        }
    }
-   public void add()
+    
+    
+     public void add()
    {
-   
-       try {
-            DateTimeFormatter dt =DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        try {
+            DateTimeFormatter dt = DateTimeFormatter.ofPattern("yyyy/mm/dd");
             LocalDateTime now = LocalDateTime.now();
             String date = dt.format(now);
-            String vendor= txtvendor.getSelectedItem().toString();
-            String subtotal= txttotalcost.getText();
-            String pay= txtpayment.getText();
-            String bal= txtbalance.getText();
+            
+           
+            String subtotal = txttotalcost.getText();
+            String pay = txtpayment.getText();
+            String bal = txtbalance.getText();
             int lastid =0;
             
-            String query1 ="insert into purchase(date,vendor,subtotal,pay,bal)values(?,?,?,?,?)";
-            pst =con.prepareStatement(query1,Statement.RETURN_GENERATED_KEYS);
+            String query1 = "insert into sales(date, subtotal, pay, bal)values(?,?,?,?)";
+            pst = con.prepareStatement(query1, Statement.RETURN_GENERATED_KEYS);
             
-            pst.setString(1,date);
-            pst.setString(2,vendor);
-            pst.setString(3,subtotal);
-            pst.setString(4,pay);
-            pst.setString(5,bal);
-            //pst.executeUpdate();
+            pst.setString(1, date );
+            pst.setString(2, subtotal);
+            pst.setString(3, pay);
+            pst.setString(4, bal);
+           // pst.executeUpdate();
             rs = pst.getGeneratedKeys();
             
             if(rs.next())
             {
                 lastid =rs.getInt(1);
-            
             }
             
-            String query2 ="insert into purchaseitem(purid,pid,rprice,qty,total)values(?,?,?,?,?)";
-            pst1 =con.prepareStatement(query2);
-            
+            String query2 = "insert into sales_product(sales_id, pid, price, qty, total)values(?,?,?,?,?)";
+            pst1 = con.prepareStatement(query2);
             
             String productid;
             String price;
-            String qty;
-            int total=0;
+            String quantity;
+            int total = 0;
             
-            for(int i=0; i<jTable1.getRowCount();i++)
+            for(int i=0; i<jTable1.getRowCount() ; i++)
             {
-                productid = (String)jTable1.getValueAt(i,0);
-                price = (String)jTable1.getValueAt(i,2);
-                qty= (String)jTable1.getValueAt(i,3);
-                total = (int)jTable1.getValueAt(i,4);
+                productid = (String)jTable1.getValueAt(i, 0);
+                price = (String)jTable1.getValueAt(i, 2);
+                quantity = (String)jTable1.getValueAt(i, 3);
+                total =(int)jTable1.getValueAt(i, 4);
                 
-               pst1.setInt(1,lastid);
-               pst1.setString(2,productid);
-               pst1.setString(3,price);
-               pst1.setString(4,qty);
-               pst1.setInt(5,total);
-               pst1.executeUpdate();
-                 
+                pst1.setInt(1, lastid);
+                pst1.setString(2, productid);
+                pst1.setString(3, price);
+                pst1.setString(4, quantity);
+                pst1.setInt(5, total);
+                pst1.executeUpdate();
             }
-             String query3 ="update product set qty = qty+ ? where barcode = ? ";
-             pst2 =con.prepareCall(query3);
-             for(int i=0; i<jTable1.getRowCount();i++)
-            {
-                productid = (String)jTable1.getValueAt(i,0);
-                qty= (String)jTable1.getValueAt(i,3);
-                
-               pst2.setString(1,qty);
-               pst2.setString(2,productid);
-               pst2.executeUpdate();
-                 
-            }
-                     
-            JOptionPane.showMessageDialog(this, "purchase updatedddddd!!!!!!");
-      
             
+            String query3 ="update product set qty = qty- ? where barcode=? ";
+            pst2 = con.prepareStatement(query3);
+            
+            
+            for(int i=0; i<jTable1.getRowCount() ; i++)
+            {
+                productid = (String)jTable1.getValueAt(i, 0);
+                quantity = (String)jTable1.getValueAt(i, 3);
+              
+                pst1.setString(1, productid);
+                pst1.setString(2, quantity);
+                pst1.executeUpdate();
+            }
+            
+            JOptionPane.showMessageDialog(this, "Sales Completedddddddd !!!!!!");
+            try {
+            Class.forName("com.mysql.jdbc.Driver");
+            // setup the connection with the DB.
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3307/stockmanagement1"
+              + "user=root&password=");
+        } catch (Exception ex) {
+            System.out.println("Database.getConnection() Error -->" + ex.getMessage());            
+        }
+
+
+            /**You can also test this line if you want to display 
+           * report from any absolute path other than the project root path*/
+
+            String ReportFile = "C:\\Users\\mis\\Documents\\NetBeansProjects\\stockmanagement\\src\\stock\\report1.jrxml";
+            String jasperFileName = "C:\\Users\\mis\\Documents\\NetBeansProjects\\stockmanagement\\src\\stock\\report1.jasper";
+
+           InputStream inputx = null;   
+        try {
+            inputx = new FileInputStream(new File("C:\\Users\\mis\\Documents\\NetBeansProjects\\stockmanagement\\src\\stock\\report1.jrxml"));
+        } catch (FileNotFoundException ex) {
+          //  Logger.getLogger(PrintReport1.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+           try {    
+            JasperDesign jasperDesign = JRXmlLoader.load(inputx);                   
+
+            JRDesignQuery jrd = new JRDesignQuery();
+
+
+            JasperReport jasperReport = JasperCompileManager.compileReport(jasperDesign);            
+                JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, null, con);
+
+            JasperViewer jv = new JasperViewer(jasperPrint);
+            jv.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            jv.setExtendedState(MAXIMIZED_BOTH);
+            jv.setVisible(true);
+
+        } catch (JRException e) {
+            e.printStackTrace();
+        }               
+          
+        /*    HashMap p = new HashMap();
+            p.put("invo", lastid);
+            
+            try {
+                JasperDesign jdesign = JRXmlLoader.load("C:\\Users\\mis\\Documents\\NetBeansProjects\\stockmanagement\\src\\stock\\report1.jrxml");
+                JasperReport jreport = JasperCompileManager.compileReport(jdesign);
+                
+                JasperPrint jprint = JasperFillManager.fillReport(jreport,p,con);
+                JasperViewer.viewReport(jprint);
+                
+            } catch (JRException ex) {
+                Logger.getLogger(Sales.class.getName()).log(Level.SEVERE, null, ex);
+            }*/
+            
+            
+            
+            
+            
+ 
             
         } catch (SQLException ex) {
             Logger.getLogger(purchase.class.getName()).log(Level.SEVERE, null, ex);
         }
-       
-       
-       
-       
-           
-           }
+   }
+   
+    
+    
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -248,15 +317,11 @@ public class purchase extends javax.swing.JFrame {
         txtpayment = new javax.swing.JTextField();
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
-        jLabel11 = new javax.swing.JLabel();
-        txttotalcost1 = new javax.swing.JTextField();
-        jLabel2 = new javax.swing.JLabel();
-        txtvendor = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
-        jLabel1.setText("Purchase");
+        jLabel1.setText("Sales");
 
         jPanel1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
@@ -374,16 +439,6 @@ public class purchase extends javax.swing.JFrame {
             }
         });
 
-        jLabel11.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel11.setText("Commision");
-
-        txttotalcost1.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        txttotalcost1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txttotalcost1ActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -391,6 +446,14 @@ public class purchase extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(26, 26, 26)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 627, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(26, 26, 26)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(txttotalcost, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtbalance, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(txtpayment, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 26, Short.MAX_VALUE))
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel3)
@@ -405,38 +468,18 @@ public class purchase extends javax.swing.JFrame {
                             .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(51, 51, 51)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel6)
-                                    .addComponent(txtquantity, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(156, 156, 156))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel6)
+                                .addGroup(jPanel1Layout.createSequentialGroup()
+                                    .addComponent(txtquantity, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGap(83, 83, 83)
+                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(40, 40, 40))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 627, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(26, 26, 26)
-                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel1Layout.createSequentialGroup()
-                                        .addGap(10, 10, 10)
-                                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addComponent(txttotalcost, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(txtbalance, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(txtpayment, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(txttotalcost1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(0, 26, Short.MAX_VALUE))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addGap(42, 42, 42)
-                                .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(38, 38, 38))))))
+                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(40, 40, 40))))
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGap(179, 179, 179)
                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 92, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -468,20 +511,16 @@ public class purchase extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 260, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel11)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txttotalcost1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(txttotalcost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
+                        .addComponent(txttotalcost, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(32, 32, 32)
                         .addComponent(jLabel9)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(txtpayment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(33, 33, 33)
                         .addComponent(jLabel10)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(txtbalance, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -490,15 +529,6 @@ public class purchase extends javax.swing.JFrame {
                 .addContainerGap(19, Short.MAX_VALUE))
         );
 
-        jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jLabel2.setText("Vendor");
-
-        txtvendor.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtvendorActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -506,24 +536,17 @@ public class purchase extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(64, 64, 64)
                 .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 417, Short.MAX_VALUE)
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(36, 36, 36)
-                .addComponent(txtvendor, javax.swing.GroupLayout.PREFERRED_SIZE, 118, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(98, 98, 98))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createSequentialGroup()
                 .addGap(30, 30, 30)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(51, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(23, 23, 23)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel2)
-                    .addComponent(txtvendor))
+                .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(31, 31, 31))
@@ -537,6 +560,14 @@ public class purchase extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtpcodeActionPerformed
 
+    private void txtpcodeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtpcodeKeyPressed
+        // TODO add your handling code here:
+        if(evt.getKeyCode() == KeyEvent.VK_ENTER)
+        {
+            barcode();
+        }
+    }//GEN-LAST:event_txtpcodeKeyPressed
+
     private void txtquantityActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtquantityActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtquantityActionPerformed
@@ -548,6 +579,17 @@ public class purchase extends javax.swing.JFrame {
     private void txtpnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtpnameActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtpnameActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        Sales();
+
+       
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTable1MouseClicked
 
     private void txttotalcostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txttotalcostActionPerformed
         // TODO add your handling code here:
@@ -561,49 +603,22 @@ public class purchase extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtpaymentActionPerformed
 
-    private void jTable1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTable1MouseClicked
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jTable1MouseClicked
+        int pay = Integer.parseInt(txtpayment.getText());
+        int subtotal = Integer.parseInt(txttotalcost.getText());
+        int bal = pay - subtotal;
+
+        txtbalance.setText(String.valueOf(bal));
+
+        add();
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         this.setVisible(false);
     }//GEN-LAST:event_jButton3ActionPerformed
 
-    private void txtpcodeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtpcodeKeyPressed
-        // TODO add your handling code here:
-        if(evt.getKeyCode() == KeyEvent.VK_ENTER)
-        {
-            barcode();
-        }
-    }//GEN-LAST:event_txtpcodeKeyPressed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        purchase();
-        
-       
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void txtvendorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtvendorActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtvendorActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-        int pay =Integer.parseInt(txtpayment.getText());
-          int subtotal =Integer.parseInt(txttotalcost.getText());
-      int bal = subtotal-pay;
-      txtbalance.setText(String.valueOf(bal));
-        
-        add();
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void txttotalcost1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txttotalcost1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txttotalcost1ActionPerformed
-
-   
     /**
      * @param args the command line arguments
      */
@@ -621,13 +636,13 @@ public class purchase extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(purchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Sales.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(purchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Sales.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(purchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Sales.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(purchase.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(Sales.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
@@ -635,9 +650,9 @@ public class purchase extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    new purchase().setVisible(true);
+                    new Sales().setVisible(true);
                 } catch (Exception ex) {
-                    Logger.getLogger(purchase.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(Sales.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -649,8 +664,6 @@ public class purchase extends javax.swing.JFrame {
     private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
@@ -667,7 +680,5 @@ public class purchase extends javax.swing.JFrame {
     private javax.swing.JTextField txtprice;
     private javax.swing.JTextField txtquantity;
     private javax.swing.JTextField txttotalcost;
-    private javax.swing.JTextField txttotalcost1;
-    private javax.swing.JComboBox<String> txtvendor;
     // End of variables declaration//GEN-END:variables
 }

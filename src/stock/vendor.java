@@ -5,6 +5,7 @@
  */
 package stock;
 
+import java.awt.Color;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -14,6 +15,8 @@ import java.sql.SQLException;
 import java.util.Vector;
 import java.util .logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -38,28 +41,34 @@ public class vendor extends javax.swing.JFrame {
     Connection con;
     PreparedStatement pst;
     DefaultTableModel df;
-    
-    /*public void Connect(){
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagement","root","");
-            
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
-         }
-    
-    
-    }*/
+   
     public Connection getCon() throws Exception{
         String driver ="com.mysql.jdbc.Driver";
-        String url="jdbc:mysql://localhost:3307/stockmanagement";
+        String url="jdbc:mysql://localhost:3307/stockmanagement1";
         Class.forName(driver);
        con=DriverManager.getConnection(url, "root", "");
         return con;
     }
-    
+    //public class Validation {
+
+        
+        /*public static boolean email_validation(String email){
+            boolean status =false;
+            
+            String email_Pattern="^[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*@[_A-Za-z0-9-]+(\\.[_A-Za-z0-9-]+)*(\\.[_A-Za-z]{2,}))$";
+            
+            Pattern pattern =Pattern.compile(email_Pattern);
+            Matcher matcher =pattern.matcher(email);
+            
+            if(matcher.matches()){
+                status=true;
+            }else{
+                status=false;
+            }
+            
+            return status;
+        }
+    }*/
     public void load()
     {
         int a;
@@ -89,6 +98,7 @@ public class vendor extends javax.swing.JFrame {
             Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -122,7 +132,7 @@ public class vendor extends javax.swing.JFrame {
         jPanel1.setBorder(new javax.swing.border.SoftBevelBorder(javax.swing.border.BevelBorder.RAISED));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel1.setText("VendorName");
+        jLabel1.setText("Vendorname");
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel2.setText("phone");
@@ -142,6 +152,11 @@ public class vendor extends javax.swing.JFrame {
         txtphone.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtphoneActionPerformed(evt);
+            }
+        });
+        txtphone.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txtphoneKeyReleased(evt);
             }
         });
 
@@ -296,7 +311,7 @@ public class vendor extends javax.swing.JFrame {
             String email = txtemail.getText();
             String address = txtaddress.getText();
             
-            
+            //System.out.println("1"+vname+"2"+phone+"3"+email);
             pst= con.prepareStatement("insert into vendor(name,phone,email,address)values(?,?,?,?)");
             pst.setString(1, vname);
             pst.setString(2, phone);
@@ -312,6 +327,21 @@ public class vendor extends javax.swing.JFrame {
             txtvendor.requestFocus();
             load();
             
+            String mobileNo=txtphone.getText();
+        if(mobileNo.matches("^[0-9]*$")&& mobileNo.length()==10)
+        {   
+            JOptionPane.showMessageDialog(null,"correct mobile number");
+        }
+        else{
+           JOptionPane.showMessageDialog(null,"incorrect mobile number");
+        }
+        //boolean status =Validation.email_validation(txtemail.getText());
+           //     if(status){
+                    //lbl_Message.setText("True");
+             //   }else{
+                    //lbl_Message.setText("True");
+               // }
+            
             
             
             
@@ -319,6 +349,8 @@ public class vendor extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(vendor.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void txtphoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtphoneActionPerformed
@@ -362,7 +394,7 @@ public class vendor extends javax.swing.JFrame {
             pst.setString(3, email);
             pst.setString(4, address);
             pst.setInt(5, id);
-            //pst.executeUpdate();
+            pst.executeUpdate();
             JOptionPane.showMessageDialog(this,"Vendor updated");
            
             
@@ -428,6 +460,11 @@ public class vendor extends javax.swing.JFrame {
         
         this.setVisible(false);
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void txtphoneKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txtphoneKeyReleased
+        // TODO add your handling code here:
+        
+    }//GEN-LAST:event_txtphoneKeyReleased
 
     /**
      * @param args the command line arguments

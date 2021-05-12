@@ -40,6 +40,7 @@ public class Product extends javax.swing.JFrame {
    /* public void Connect()
     {
        
+<<<<<<< HEAD
         try {
             Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagment", "root", "1357");
@@ -51,10 +52,21 @@ public class Product extends javax.swing.JFrame {
        */ 
          public Connection getCon() throws Exception{
         String driver ="com.mysql.jdbc.Driver";
-        String url="jdbc:mysql://localhost:3307/stockmanagement";
+        String url="jdbc:mysql://localhost:3307/stockmanagement1";
         Class.forName(driver);
            con=DriverManager.getConnection(url, "root", "");
         return con;
+
+//        try {
+//            Class.forName("com.mysql.cj.jdbc.Driver");
+//            con = DriverManager.getConnection("jdbc:mysql://localhost/stockmanagment", "root", "");
+//        } catch (ClassNotFoundException ex) {
+//            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(Product.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+       
+//>>>>>>> origin/master
     }
     
     
@@ -138,7 +150,7 @@ public class Product extends javax.swing.JFrame {
         jLabel3.setText("Description");
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
-        jLabel4.setText("BarCode");
+        jLabel4.setText("ProductCode");
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
         jLabel5.setText("Cost Price");
@@ -176,8 +188,8 @@ public class Product extends javax.swing.JFrame {
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
                 .addGap(33, 33, 33)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtdes, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -350,7 +362,7 @@ public class Product extends javax.swing.JFrame {
             String reOrderLevel = txtrolevel.getText();
             
             
-            pst= con.prepareStatement("insert into product(pname, des, barcode, cprice, rprice, qty, rlevel)values(?,?,?,?,?,?,?)");
+            pst= con.prepareStatement("insert into product(pname, des, barcode, cprice, rprice, qty, rlevel) values(?,?,?,?,?,?,?)");
             pst.setString(1, pname);
             pst.setString(2, des);
             pst.setString(3, barcode);
@@ -396,7 +408,7 @@ public class Product extends javax.swing.JFrame {
             
             
         try {
-            pst= con.prepareStatement("update product pname =?, des=?, barcode=?, cprice=?, rprice=?, qty=?, rlevel=? where id =?");
+            pst= con.prepareStatement("update product set pname =?, des=?, barcode=?, cprice=?, rprice=?, qty=?, rlevel=? where id =?");
             pst.setString(1, pname);
             pst.setString(2, des);
             pst.setString(3, barcode);
@@ -405,7 +417,7 @@ public class Product extends javax.swing.JFrame {
             pst.setString(6, quantity);
             pst.setString(7, reOrderLevel);
             pst.setInt(8, id);
-            //pst.executeUpdate();
+            pst.executeUpdate();
             JOptionPane.showMessageDialog(this,"Product Updated");
             
             txtpname.setText("");
